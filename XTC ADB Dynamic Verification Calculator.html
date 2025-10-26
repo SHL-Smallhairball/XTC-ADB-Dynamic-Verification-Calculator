@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小天才动态校验码计算</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px 30px;
+            transition: all 0.3s ease;
+            border: 1px solid #eaeaea;
+            position: relative;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .header h1 {
+            color: #222;
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #444;
+            font-size: 15px;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: #fafafa;
+            color: #333;
+        }
+        
+        .input-field:focus {
+            border-color: #555;
+            box-shadow: 0 0 0 3px rgba(85, 85, 85, 0.1);
+            outline: none;
+            background-color: #fff;
+        }
+        
+        .mode-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .mode-button {
+            flex: 1;
+            padding: 14px;
+            border: 1.5px solid #ddd;
+            background: #fafafa;
+            color: #555;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .mode-button.active {
+            background: #333;
+            color: white;
+            border-color: #333;
+        }
+        
+        .mode-button:hover:not(.active) {
+            background: #f0f0f0;
+            border-color: #bbb;
+        }
+        
+        .calculate-button {
+            width: 100%;
+            padding: 16px;
+            background: #222;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 5px;
+        }
+        
+        .calculate-button:hover {
+            background: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .calculate-button:active {
+            transform: translateY(0);
+        }
+        
+        .result-container {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s;
+            opacity: 1;
+            transform: translateY(0);
+            border: 1.5px solid transparent;
+        }
+        
+        .result-container.hidden {
+            opacity: 0;
+            transform: translateY(10px);
+            display: none;
+        }
+        
+        .result-success {
+            background: #f8f9fa;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .result-error {
+            background: #f8f9fa;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .result-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .result-value {
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            padding: 10px;
+            background: rgba(0,0,0,0.03);
+            border-radius: 6px;
+        }
+        
+        .tips {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #555;
+        }
+        
+        .tips h3 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .tips p {
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        .v3-tips {
+            margin-top: 25px;
+            padding: 18px;
+            background: #fff3cd;
+            border-radius: 8px;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .v3-tips h3 {
+            margin-bottom: 10px;
+            color: #856404;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        
+        .v3-tips p {
+            margin-bottom: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #777;
+            font-size: 13px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            line-height: 1.5;
+        }
+        
+        .github-section {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .github-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: 1px solid #333;
+            font-size: 14px;
+        }
+        
+        .github-button:hover {
+            background: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .github-icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+        
+        .github-link {
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+            text-align: center;
+        }
+        
+        .copyright {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #888;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px 20px;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .mode-selector {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>小天才V1-3校验码计算器</h1>
+            <p>为小天才手表生成ADB调试码和自检码</p>
+        </div>
+
+        <div class="input-group">
+            <label for="codeInput" class="label">输入校验码：</label>
+            <input 
+                type="text" 
+                id="codeInput" 
+                class="input-field" 
+                placeholder="请输入6位、8位或10位数字..."
+                maxlength="10"
+            >
+        </div>
+
+        <div class="mode-selector">
+            <button type="button" class="mode-button active" data-mode="adb">
+                ADB模式
+            </button>
+            <button type="button" class="mode-button" data-mode="zj">
+                自检模式
+            </button>
+        </div>
+
+        <button type="button" class="calculate-button" id="calculateBtn">
+            计算校验码
+        </button>
+
+        <div id="resultContainer" class="result-container hidden">
+            <div class="result-title" id="resultTitle"></div>
+            <div class="result-value" id="resultValue"></div>
+        </div>
+
+        <div class="tips">
+            <h3>使用说明</h3>
+            <p>• 输入6位、8位或10位数字校验码</p>
+            <p>• 8位校验码每次计算会生成不同的有效结果</p>
+        </div>
+
+        <div class="v3-tips">
+            <h3>重要提示</h3>
+            <p>如果你的手表在输入校验码后提示"验证中"，代表你的手表已经升级到V3版本校验码。</p>
+            <p>V3校验码当前除了小天才官方外无法计算，请使用QMMI打开ADB。</p>
+        </div>
+
+        <div class="footer">
+            <p>小天才手表动态校验码计算工具</p>
+            <div class="github-section">
+                <a href="https://github.com/SHL-Smallhairball/XTC-ADB-Dynamic-Verification-Calculator" 
+                   class="github-button" 
+                   target="_blank">
+                    <svg class="github-icon" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    查看GitHub项目
+                </a>
+                <div class="github-link">
+                    https://github.com/SHL-Smallhairball/XTC-ADB-Dynamic-Verification-Calculator
+                </div>
+            </div>
+            <div class="copyright">
+                © 2023 SHL-XMT
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function v1(code, mode) {
+            try {
+                if (mode === "adb") {
+                    const i1 = parseInt(code.substring(0, 2));
+                    const i2 = parseInt(code.substring(2, 4));
+                    const i3 = parseInt(code.substring(4, 6));
+                    const i4 = parseInt(code.substring(6, 8));
+                    const i5 = parseInt(code.substring(8));
+
+                    const i6 = i5 ^ (i3 + i4);
+                    const i7 = i4 ^ i6;
+                    const i8 = i3 ^ i6;
+                    const i9 = i1 ^ i6;
+                    const i10 = i2 ^ i6;
+
+                    let i = "";
+                    for (const x of [i9, i10, i8, i7, i6]) {
+                        if (x.toString().length === 1) {
+                            i += "0" + x.toString();
+                        } else {
+                            i += x.toString();
+                        }
+                    }
+
+                    const i1_2 = parseInt(i.substring(0, 2));
+                    const i2_2 = parseInt(i.substring(2, 4));
+                    const i3_2 = parseInt(i.substring(4, 6));
+                    const i4_2 = parseInt(i.substring(6, 8));
+                    const i5_2 = parseInt(i.substring(8));
+
+                    const i6_2 = i4_2 ^ i3_2;
+                    const i7_2 = i5_2 ^ i3_2;
+                    const i8_2 = i3_2 ^ (i6_2 + i7_2);
+                    const i9_2 = i1_2 ^ i7_2;
+                    const i10_2 = i2_2 ^ i7_2;
+
+                    let i2_result = "";
+                    for (const x of [i9_2, i10_2, i6_2, i7_2, i8_2]) {
+                        if (x.toString().length === 1) {
+                            i2_result += "0" + x.toString();
+                        } else {
+                            i2_result += x.toString();
+                        }
+                    }
+
+                    return i2_result;
+                } else if (mode === "zj") {
+                    const i1 = parseInt(code.substring(0, 2));
+                    const i2 = parseInt(code.substring(2, 4));
+                    const i3 = parseInt(code.substring(4));
+
+                    const i5 = i3 ^ (i1 + i2);
+                    const i6 = i1 ^ i5;
+                    const i4 = i2 ^ i5;
+
+                    let i = "";
+                    for (const x of [i6, i4, i5]) {
+                        if (x.toString().length === 1) {
+                            i += "0" + x.toString();
+                        } else {
+                            i += x.toString();
+                        }
+                    }
+
+                    const i1_2 = parseInt(i.substring(0, 2));
+                    const i2_2 = parseInt(i.substring(2, 4));
+                    const i3_2 = parseInt(i.substring(4));
+
+                    const i5_2 = i2_2 ^ i1_2;
+                    const i6_2 = i3_2 ^ i1_2;
+                    const i4_2 = i1_2 ^ (i5_2 + i6_2);
+
+                    let i2_result = "";
+                    for (const x of [i5_2, i6_2, i4_2]) {
+                        if (x.toString().length === 1) {
+                            i2_result += "0" + x.toString();
+                        } else {
+                            i2_result += x.toString();
+                        }
+                    }
+
+                    return i2_result;
+                }
+            } catch (error) {
+                return "";
+            }
+            return "";
+        }
+
+        function v2(code, mode) {
+            try {
+                let num;
+                if (mode === "adb") {
+                    num = 2;
+                } else {
+                    num = 1;
+                }
+
+                if (/^\d+$/.test(code)) {
+                    const key = parseInt(code[7]) ^ num;
+                    const v7 = (parseInt(code[key]) - key + 10) % 10;
+                    let result1 = "";
+                    for (let i = 0; i < 7; i++) {
+                        const curKey = v7;
+                        if (i === key) {
+                            result1 += v7.toString();
+                        } else {
+                            const curInt = parseInt(code[i]);
+                            result1 += ((curInt + 10 - curKey) % 10).toString();
+                        }
+                    }
+
+                    const keyId = Math.floor(Math.random() * 7);
+                    const keyValue = parseInt(result1[keyId]);
+                    let result = "";
+                    for (let i = 0; i < 7; i++) {
+                        const curKey = i === keyId ? keyId : keyValue;
+                        const curInt = parseInt(result1[i]);
+                        result += ((curInt + curKey) % 10).toString();
+                    }
+                    result += (num ^ keyId).toString();
+                    return result;
+                } else {
+                    return "";
+                }
+            } catch (error) {
+                return "";
+            }
+        }
+
+        function getCode(code, mode) {
+            if (code.length === 8) {
+                let result = null;
+                while (true) {
+                    result = v2(code, mode);
+                    if (result != null && result != code) {
+                        break;
+                    }
+                }
+                return result;
+            } else {
+                return v1(code, mode);
+            }
+        }
+
+        class ADBCalculator {
+            constructor() {
+                this.currentMode = 'adb';
+                this.initializeElements();
+                this.attachEventListeners();
+            }
+
+            initializeElements() {
+                this.codeInput = document.getElementById('codeInput');
+                this.calculateBtn = document.getElementById('calculateBtn');
+                this.modeButtons = document.querySelectorAll('.mode-button');
+                this.resultContainer = document.getElementById('resultContainer');
+                this.resultTitle = document.getElementById('resultTitle');
+                this.resultValue = document.getElementById('resultValue');
+            }
+
+            attachEventListeners() {
+                this.calculateBtn.addEventListener('click', () => this.calculate());
+                this.codeInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.calculate();
+                    }
+                });
+
+                this.modeButtons.forEach(button => {
+                    button.addEventListener('click', () => this.setMode(button.dataset.mode));
+                });
+            }
+
+            setMode(mode) {
+                this.currentMode = mode;
+                this.modeButtons.forEach(button => {
+                    if (button.dataset.mode === mode) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                });
+            }
+
+            calculate() {
+                const code = this.codeInput.value.trim();
+                
+                if (!code) {
+                    this.showError('请输入校验码');
+                    return;
+                }
+
+                if (!/^\d+$/.test(code)) {
+                    this.showError('校验码必须为数字');
+                    return;
+                }
+
+                if (code.length !== 8 && code.length !== 10 && code.length !== 6) {
+                    this.showError('校验码必须为6位、8位或10位数字');
+                    return;
+                }
+
+                const result = getCode(code, this.currentMode);
+
+                if (result === '') {
+                    this.showError('计算失败，请检查输入格式');
+                } else {
+                    this.showSuccess(result);
+                }
+            }
+
+            showError(message) {
+                this.resultContainer.className = 'result-container result-error';
+                this.resultTitle.textContent = '错误';
+                this.resultValue.textContent = message;
+                this.resultContainer.classList.remove('hidden');
+            }
+
+            showSuccess(result) {
+                this.resultContainer.className = 'result-container result-success';
+                this.resultTitle.textContent = '计算结果';
+                this.resultValue.textContent = result;
+                this.resultContainer.classList.remove('hidden');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new ADBCalculator();
+        });
+    </script>
+</body>
+</html>
